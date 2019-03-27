@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type JsonResponse struct {
@@ -45,7 +46,6 @@ func main() {
 	for _, r := range repos {
 
 		url := fmt.Sprintf("https://%s/%s/%s/branch/%s?access_token=%s", host, path, r, branch, token)
-		fmt.Println(url)
 
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
@@ -76,10 +76,15 @@ func main() {
 
 		coverage := "Not Reporting"
 		if doc.Commit.Totals.C != "" {
-			coverage = doc.Commit.Totals.C
+			parsedFloat, err := strconv.ParseFloat(doc.Commit.Totals.C, 32)
+			coverage = fmt.Sprintf("%.2f", parsedFloat)
+			if err != nil {
+				log.Fatal("ParseFloat:", err)
+			}
+
 		}
 
-		fmt.Printf("%s : %s\n", r, coverage)
+		fmt.Printf("- %s : %s\n", r, coverage)
 
 	}
 
