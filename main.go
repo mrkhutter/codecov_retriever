@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -32,16 +33,28 @@ type JsonResponse struct {
 
 func main() {
 
-	repos := []string{
-		"your-repo-1",
-		"your-repo-2",
-		"your-repo-3",
-	}
+	var repos []string
 
 	token := os.Getenv("CODECOV_TOKEN")
 	host := os.Getenv("CODECOV_HOST")
 	path := os.Getenv("CODECOV_PATH")
 	branch := os.Getenv("CODECOV_BRANCH")
+
+	file, err := os.Open("repos.txt")
+	if err != nil {
+		log.Fatal("Open", err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		repos = append(repos, scanner.Text())
+		//		printSlice(repos)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
 
 	for _, r := range repos {
 
@@ -85,7 +98,9 @@ func main() {
 		}
 
 		fmt.Printf("- %s : %s\n", r, coverage)
-
 	}
+}
 
+func printSlice(s []string) {
+	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
